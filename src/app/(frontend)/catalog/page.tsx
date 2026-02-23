@@ -5,7 +5,7 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import type { Category } from '@/payload-types'
 
 export const metadata = {
-  title: 'Каталог промышленных швейных машин | SEWTECH Алматы',
+  title: 'Каталог промышленных швейных машин',
   description:
     'Промышленные швейные машины JUKI: прямострочные, оверлоки, закрепочные, петельные, автоматы. Купить в Алматы.',
 }

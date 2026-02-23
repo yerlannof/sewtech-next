@@ -2,19 +2,10 @@ import Link from 'next/link'
 
 const NAV_ITEMS = [
   { label: 'Каталог', href: '/catalog' },
-  {
-    label: 'Прямострочные',
-    href: '/catalog/dlya-poshiva-odezhdy/odnoigolnaya-pryamostrochaya-mashina-chelnochnyj-stezhok',
-  },
-  {
-    label: 'Оверлоки',
-    href: '/catalog/dlya-poshiva-odezhdy/overlok-kraeobmyotochnaya-mashina',
-  },
-  {
-    label: 'Автоматы',
-    href: '/catalog/dlya-poshiva-odezhdy/avtomaticheskaya-shvejnaya-mashina',
-  },
-  { label: 'Бренды', href: '/brands' },
+  { label: 'Прямострочные', href: '/catalog/dlya-poshiva-odezhdy/odnoigolnaya-pryamostrochnaya' },
+  { label: 'Оверлоки', href: '/catalog/dlya-poshiva-odezhdy/overlok-kraeobmyotochnaya' },
+  { label: 'Автоматы', href: '/catalog/dlya-poshiva-odezhdy/avtomaticheskaya-shvejnaya-mashina' },
+  { label: 'Закрепочные', href: '/catalog/dlya-poshiva-odezhdy/zakrepochnaya-mashina' },
   { label: 'О компании', href: '/about' },
   { label: 'Контакты', href: '/contacts' },
 ]

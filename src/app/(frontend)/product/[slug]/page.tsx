@@ -27,11 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const brand = typeof product.brand === 'object' ? (product.brand as Brand) : null
   const brandName = brand?.name || 'JUKI'
-  const metaTitle = product.meta?.title || `${product.name} - купить в Алматы | SEWTECH`
+  const specs = (product.specifications || []) as Array<{ name: string; value: string }>
+  const specsPreview = specs.slice(0, 3).map((s) => `${s.name}: ${s.value}`).join('. ')
+  const metaTitle = product.meta?.title || `${product.name} — купить в Алматы`
   const metaDesc =
     product.meta?.description ||
-    product.shortDescription ||
-    `${brandName} ${product.name}. Характеристики, цена, наличие. Официальный дилер в Казахстане. Доставка по РК.`
+    `${product.name}. ${specsPreview ? specsPreview + '. ' : ''}Цена, характеристики, наличие. Официальный дилер ${brandName} в Казахстане.`
 
   const images = product.images as Media[] | null | undefined
   const ogImage = images?.[0]?.sizes?.card?.url || images?.[0]?.url
