@@ -21,6 +21,7 @@
     "@payloadcms/plugin-redirects": "^3.77.0",
     "@payloadcms/plugin-seo": "^3.77.0",
     "@payloadcms/richtext-lexical": "^3.77.0",
+    "@payloadcms/storage-vercel-blob": "^3.77.0",
     "cheerio": "^1.2.0",
     "dotenv": "^17.3.1",
     "graphql": "^16.12.0",
