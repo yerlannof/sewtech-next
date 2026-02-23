@@ -1,26 +1,11 @@
 import Link from 'next/link'
 
 const CATALOG_LINKS = [
-  {
-    label: 'Прямострочные машины',
-    href: '/catalog/dlya-poshiva-odezhdy/odnoigolnaya-pryamostrochaya-mashina-chelnochnyj-stezhok',
-  },
-  {
-    label: 'Оверлоки',
-    href: '/catalog/dlya-poshiva-odezhdy/overlok-kraeobmyotochnaya-mashina',
-  },
-  {
-    label: 'Закрепочные машины',
-    href: '/catalog/dlya-poshiva-odezhdy/zakrepochnaya-mashina',
-  },
-  {
-    label: 'Петельные машины',
-    href: '/catalog/dlya-poshiva-odezhdy/petelnaya-mashina',
-  },
-  {
-    label: 'Автоматы',
-    href: '/catalog/dlya-poshiva-odezhdy/avtomaticheskaya-shvejnaya-mashina',
-  },
+  { label: 'Прямострочные', href: '/catalog/dlya-poshiva-odezhdy/odnoigolnaya-pryamostrochnaya' },
+  { label: 'Оверлоки', href: '/catalog/dlya-poshiva-odezhdy/overlok-kraeobmyotochnaya' },
+  { label: 'Закрепочные', href: '/catalog/dlya-poshiva-odezhdy/zakrepochnaya-mashina' },
+  { label: 'Петельные', href: '/catalog/dlya-poshiva-odezhdy/petelnaya-mashina' },
+  { label: 'Автоматы', href: '/catalog/dlya-poshiva-odezhdy/avtomaticheskaya-shvejnaya-mashina' },
   { label: 'Запчасти', href: '/catalog/zapchasti' },
 ]
 

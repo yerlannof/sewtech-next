@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { MobileMenu } from './MobileMenu'
 
 const NAV_ITEMS = [
   { label: 'Каталог', href: '/catalog' },
@@ -35,7 +36,7 @@ export async function Header() {
       </div>
 
       {/* Main bar */}
-      <div className="bg-white border-b shadow-sm">
+      <div className="bg-white border-b shadow-sm relative">
         <div className="container mx-auto px-4 py-3 flex items-center gap-4">
           <Link href="/" className="text-2xl font-bold text-[#1B4F72] shrink-0">
             SEWTECH
@@ -85,7 +86,7 @@ export async function Header() {
           </div>
 
           {/* Mobile: search icon + hamburger */}
-          <div className="flex items-center gap-2 md:hidden ml-auto">
+          <div className="flex items-center gap-1 md:hidden ml-auto">
             <Link href="/search" className="p-2 text-gray-600 hover:text-[#1B4F72] transition">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -102,22 +103,7 @@ export async function Header() {
                 />
               </svg>
             </Link>
-            <button className="p-2 text-gray-600 hover:text-[#1B4F72] transition">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
+            <MobileMenu />
           </div>
         </div>
       </div>
