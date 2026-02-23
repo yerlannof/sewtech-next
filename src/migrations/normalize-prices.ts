@@ -1,20 +1,18 @@
 /**
- * Normalize prices: KZT → USD conversion
+ * Normalize prices: KZT → USD conversion (JUKI only)
  *
  * Background:
- *   Prices in the DB are a mix of KZT and USD values.
- *   - JUKI machines imported from OpenCart had prices in KZT (e.g., 16,800,000 for a machine)
- *   - Non-JUKI items (needles, accessories) already have prices in USD (e.g., 1.10, 15.50)
+ *   JUKI prices came from data/knowledge/prices.json (field: price_kzt) → in KZT
+ *   Non-JUKI prices came from data/opencart/products.json → already in USD
  *
  * Logic:
- *   - price > 1000  → KZT, convert to USD: price / EXCHANGE_RATE
- *   - price ≤ 1000  → already USD, no change
- *   - Boundary cases (500-1000) → flagged for manual review
+ *   - Load JUKI model list from prices.json
+ *   - Only convert products that match JUKI price list models
+ *   - Non-JUKI products are NEVER touched
  *
  * Also:
- *   - Removes priceUSD field values (field will be dropped from schema)
  *   - Assigns category to "Kansai Special DLR 1508P" (P1-4)
- *   - Creates "Без бренда" brand and assigns to 38 brandless products (P2-4)
+ *   - Creates "Без бренда" brand and assigns to brandless products (P2-4)
  *
  * Usage:
  *   npx tsx src/migrations/normalize-prices.ts --dry-run    # Preview changes
@@ -22,13 +20,14 @@
  */
 
 import 'dotenv/config'
+import fs from 'fs'
+import path from 'path'
 import { getPayload, type Payload } from 'payload'
 import config from '../payload/payload.config'
 
 const EXCHANGE_RATE = 470
-const BOUNDARY_LOW = 500
-const BOUNDARY_HIGH = 1000
 const DRY_RUN = process.argv.includes('--dry-run')
+const JUKI_PRICES_PATH = '/home/yerla/projects/juki-rag-project/data/knowledge/prices.json'
 
 async function main() {
   console.log(`\n=== Normalize Prices Migration ===`)
@@ -46,29 +45,53 @@ async function main() {
 }
 
 async function normalizePrices(payload: Payload) {
-  console.log('--- Step 1: Normalize prices (KZT → USD) ---')
+  console.log('--- Step 1: Normalize JUKI prices (KZT → USD) ---')
 
+  // Load JUKI price list to know which models have KZT prices
+  if (!fs.existsSync(JUKI_PRICES_PATH)) {
+    console.log(`  ⚠ JUKI prices file not found: ${JUKI_PRICES_PATH}`)
+    console.log('  Skipping price normalization')
+    return
+  }
+
+  const jukiPrices: Array<{ model: string; price_kzt: number }> = JSON.parse(
+    fs.readFileSync(JUKI_PRICES_PATH, 'utf-8'),
+  )
+
+  // Build set of JUKI models that have KZT prices
+  const jukiModels = new Set<string>()
+  for (const jp of jukiPrices) {
+    // Normalize: "DDL-8100e" → "ddl-8100e", "DDL-7000 AH" → "ddl-7000ah"
+    const normalized = jp.model.replace(/\s+/g, '').toLowerCase()
+    jukiModels.add(normalized)
+  }
+  console.log(`  JUKI models with KZT prices: ${jukiModels.size}`)
+
+  // Fetch products with prices that look like KZT (> 100,000)
   const products = await payload.find({
     collection: 'products',
-    where: { price: { greater_than: 0 } },
+    where: { price: { greater_than: 100000 } },
     limit: 2000,
     depth: 0,
   })
 
-  console.log(`Found ${products.docs.length} products with price > 0\n`)
+  console.log(`  Products with price > 100,000: ${products.docs.length}\n`)
 
   let converted = 0
-  let alreadyUSD = 0
-  const boundary: Array<{ id: number; name: string; price: number }> = []
+  let skipped = 0
 
   for (const p of products.docs) {
     const price = p.price!
+    const usd = Math.round((price / EXCHANGE_RATE) * 100) / 100
 
-    if (price > BOUNDARY_HIGH) {
-      // KZT → USD
-      const usd = Math.round((price / EXCHANGE_RATE) * 100) / 100
+    // Verify this is a JUKI product by checking name or SKU
+    const nameHasJuki = p.name.toUpperCase().includes('JUKI')
+    const skuNormalized = (p.sku || '').replace(/\s+/g, '').toLowerCase()
+    const nameModel = p.name.replace(/^Швейная машина JUKI\s*/i, '').replace(/\s+/g, '').toLowerCase()
+    const isJukiModel = jukiModels.has(skuNormalized) || jukiModels.has(nameModel)
+
+    if (nameHasJuki || isJukiModel) {
       console.log(`  [KZT→USD] ${p.name}: ${price.toLocaleString()} KZT → $${usd}`)
-
       if (!DRY_RUN) {
         await payload.update({
           collection: 'products',
@@ -77,26 +100,15 @@ async function normalizePrices(payload: Payload) {
         })
       }
       converted++
-    } else if (price >= BOUNDARY_LOW && price <= BOUNDARY_HIGH) {
-      // Boundary — unclear
-      boundary.push({ id: p.id, name: p.name, price })
     } else {
-      // Already USD
-      alreadyUSD++
+      console.log(`  [SKIP] ${p.name}: $${price} (not JUKI, already USD)`)
+      skipped++
     }
   }
 
   console.log(`\nResults:`)
-  console.log(`  Converted KZT→USD: ${converted}`)
-  console.log(`  Already USD (≤${BOUNDARY_HIGH}): ${alreadyUSD}`)
-  console.log(`  Boundary cases (${BOUNDARY_LOW}-${BOUNDARY_HIGH}): ${boundary.length}`)
-
-  if (boundary.length > 0) {
-    console.log('\n  ⚠ BOUNDARY CASES — review manually:')
-    for (const b of boundary) {
-      console.log(`    ID ${b.id}: "${b.name}" — price: ${b.price}`)
-    }
-  }
+  console.log(`  Converted JUKI KZT→USD: ${converted}`)
+  console.log(`  Skipped (not JUKI): ${skipped}`)
 }
 
 async function fixKansaiCategory(payload: Payload) {

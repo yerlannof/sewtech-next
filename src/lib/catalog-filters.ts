@@ -12,7 +12,48 @@ export interface CatalogFilters {
   speedMin?: number
   speedMax?: number
   needleCount?: number[]
+  platformType?: string[]
+  stitchType?: string[]
+  motorType?: string[]
+  lubricationType?: string[]
+  threadCount?: string[]
 }
+
+// Normalization maps for spec values with inconsistent naming
+
+export const MOTOR_TYPE_NORMALIZE: Record<string, string> = {
+  'Серво мотор прямого привода': 'Прямой привод',
+  'Серво-мотор прямого привода': 'Прямой привод',
+  'Серво мотор': 'Серво-мотор',
+  'Серво-мотор': 'Серво-мотор',
+  'Пневматический': 'Пневматический',
+}
+
+export function normalizeLubrication(value: string): string {
+  const v = value.trim()
+  if (/^Автоматическ/i.test(v)) return 'Автоматическая'
+  if (/^Полу[-\s]?сух/i.test(v)) return 'Полусухая'
+  if (/^Сух/i.test(v)) return 'Сухая'
+  if (/^Минимальн/i.test(v)) return 'Минимальная'
+  return 'Другая'
+}
+
+export function normalizeThreadCount(value: string): string {
+  const m = value.match(/(\d+)/)
+  if (!m) return value
+  const n = parseInt(m[1])
+  if (n >= 12) return '12+'
+  return String(n)
+}
+
+// Spec names in the DB to filter on
+export const SPEC_FILTER_NAMES = {
+  platform: 'Тип платформы',
+  stitch: 'Тип стежка',
+  motor: 'Тип мотора',
+  lubrication: 'Тип смазки',
+  threads: 'Кол-во нитей',
+} as const
 
 export function parseFilters(searchParams: Record<string, string | undefined>): CatalogFilters {
   const filters: CatalogFilters = {}
@@ -63,6 +104,26 @@ export function parseFilters(searchParams: Record<string, string | undefined>): 
 
   if (searchParams.needles) {
     filters.needleCount = searchParams.needles.split(',').map(Number).filter(Boolean)
+  }
+
+  if (searchParams.platform) {
+    filters.platformType = searchParams.platform.split(',').filter(Boolean)
+  }
+
+  if (searchParams.stitch) {
+    filters.stitchType = searchParams.stitch.split(',').filter(Boolean)
+  }
+
+  if (searchParams.motor) {
+    filters.motorType = searchParams.motor.split(',').filter(Boolean)
+  }
+
+  if (searchParams.lubrication) {
+    filters.lubricationType = searchParams.lubrication.split(',').filter(Boolean)
+  }
+
+  if (searchParams.threads) {
+    filters.threadCount = searchParams.threads.split(',').filter(Boolean)
   }
 
   return filters
@@ -141,6 +202,11 @@ export function buildFilterUrl(
   if (filters.speedMin) params.set('speedMin', String(filters.speedMin))
   if (filters.speedMax) params.set('speedMax', String(filters.speedMax))
   if (filters.needleCount?.length) params.set('needles', filters.needleCount.join(','))
+  if (filters.platformType?.length) params.set('platform', filters.platformType.join(','))
+  if (filters.stitchType?.length) params.set('stitch', filters.stitchType.join(','))
+  if (filters.motorType?.length) params.set('motor', filters.motorType.join(','))
+  if (filters.lubricationType?.length) params.set('lubrication', filters.lubricationType.join(','))
+  if (filters.threadCount?.length) params.set('threads', filters.threadCount.join(','))
   if (sort && sort !== 'name') params.set('sort', sort)
 
   const qs = params.toString()

@@ -28,3 +28,4 @@ media/
 
 # migration data
 data/
+.vercel

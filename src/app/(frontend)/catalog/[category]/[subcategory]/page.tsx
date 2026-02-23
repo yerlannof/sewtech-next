@@ -5,7 +5,15 @@ import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { ProductCard } from '@/components/catalog/ProductCard'
 import { CatalogFilters } from '@/components/catalog/CatalogFilters'
 import { FilterBottomSheet } from '@/components/catalog/FilterBottomSheet'
-import { parseFilters, buildPayloadWhere, buildFilterUrl } from '@/lib/catalog-filters'
+import {
+  parseFilters,
+  buildPayloadWhere,
+  buildFilterUrl,
+  MOTOR_TYPE_NORMALIZE,
+  normalizeLubrication,
+  normalizeThreadCount,
+  SPEC_FILTER_NAMES,
+} from '@/lib/catalog-filters'
 import { getCurrencySettings } from '@/lib/price'
 import type { Metadata } from 'next'
 import type { Brand } from '@/payload-types'
@@ -66,19 +74,9 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
   // Parse filters
   const filters = parseFilters(sp)
   const baseWhere = { subcategory: { equals: subCat.id } }
-  const where = buildPayloadWhere(baseWhere, filters)
 
-  // Fetch products with filters
-  const products = await payload.find({
-    collection: 'products',
-    where,
-    sort,
-    page,
-    limit: perPage,
-    depth: 1,
-  })
-
-  // Fetch all products in this subcategory for filter options
+  // Fetch all products in this subcategory for filter options (including specs)
+  // We do this BEFORE the main query so we can use spec-based post-filter IDs
   const allForFilters = await payload.find({
     collection: 'products',
     where: { subcategory: { equals: subCat.id } },
@@ -88,6 +86,8 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
       purpose: true,
       maxSpeed: true,
       needleCount: true,
+      price: true,
+      specifications: true,
     },
     depth: 1,
     limit: 500,
@@ -99,6 +99,30 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
   const purposeMap = new Map<string, number>()
   const needleMap = new Map<number, number>()
   let hasSpeedData = false
+
+  // Spec-based filter maps (value → count)
+  const platformMap = new Map<string, number>()
+  const stitchMap = new Map<string, number>()
+  const motorMap = new Map<string, number>()
+  const lubricationMap = new Map<string, number>()
+  const threadMap = new Map<string, number>()
+
+  // Price range tracking
+  let priceMin = Infinity
+  let priceMax = 0
+
+  // Helper: extract normalized spec value from a product's specifications array
+  type SpecItem = { name: string; value: string; unit?: string | null }
+
+  function getSpecValue(specs: SpecItem[] | undefined | null, specName: string): string | null {
+    if (!specs) return null
+    const found = specs.find((s) => s.name === specName)
+    return found?.value?.trim() || null
+  }
+
+  // Build per-product spec lookup for post-filtering
+  type ProductSpecMap = Map<number, Record<string, string>>
+  const productSpecs: ProductSpecMap = new Map()
 
   for (const p of allForFilters.docs) {
     if (p.brand && typeof p.brand === 'object') {
@@ -118,6 +142,51 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
     if (p.needleCount) {
       needleMap.set(p.needleCount, (needleMap.get(p.needleCount) || 0) + 1)
     }
+
+    // Price range
+    if (p.price && p.price > 0) {
+      if (p.price < priceMin) priceMin = p.price
+      if (p.price > priceMax) priceMax = p.price
+    }
+
+    // Spec-based filters
+    const specs = p.specifications as SpecItem[] | undefined
+    const specRecord: Record<string, string> = {}
+
+    const platformVal = getSpecValue(specs, SPEC_FILTER_NAMES.platform)
+    if (platformVal) {
+      platformMap.set(platformVal, (platformMap.get(platformVal) || 0) + 1)
+      specRecord.platform = platformVal
+    }
+
+    const stitchVal = getSpecValue(specs, SPEC_FILTER_NAMES.stitch)
+    if (stitchVal) {
+      stitchMap.set(stitchVal, (stitchMap.get(stitchVal) || 0) + 1)
+      specRecord.stitch = stitchVal
+    }
+
+    const motorRaw = getSpecValue(specs, SPEC_FILTER_NAMES.motor)
+    if (motorRaw) {
+      const motorVal = MOTOR_TYPE_NORMALIZE[motorRaw] || motorRaw
+      motorMap.set(motorVal, (motorMap.get(motorVal) || 0) + 1)
+      specRecord.motor = motorVal
+    }
+
+    const lubricationRaw = getSpecValue(specs, SPEC_FILTER_NAMES.lubrication)
+    if (lubricationRaw) {
+      const lubricationVal = normalizeLubrication(lubricationRaw)
+      lubricationMap.set(lubricationVal, (lubricationMap.get(lubricationVal) || 0) + 1)
+      specRecord.lubrication = lubricationVal
+    }
+
+    const threadRaw = getSpecValue(specs, SPEC_FILTER_NAMES.threads)
+    if (threadRaw) {
+      const threadVal = normalizeThreadCount(threadRaw)
+      threadMap.set(threadVal, (threadMap.get(threadVal) || 0) + 1)
+      specRecord.threads = threadVal
+    }
+
+    productSpecs.set(p.id, specRecord)
   }
 
   const brandOptions = Array.from(brandMap.entries()).map(([id, data]) => ({
@@ -146,11 +215,94 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
       count: total,
     }))
 
+  const toSortedOptions = (map: Map<string, number>) =>
+    Array.from(map.entries())
+      .sort(([, a], [, b]) => b - a)
+      .map(([value, count]) => ({ value, label: value, count }))
+
+  const platformOptions = toSortedOptions(platformMap)
+  const stitchOptions = toSortedOptions(stitchMap)
+  const motorOptions = toSortedOptions(motorMap)
+  const lubricationOptions = toSortedOptions(lubricationMap)
+  const threadOptions = Array.from(threadMap.entries())
+    .sort(([a], [b]) => {
+      const na = parseInt(a), nb = parseInt(b)
+      if (!isNaN(na) && !isNaN(nb)) return na - nb
+      return a.localeCompare(b)
+    })
+    .map(([value, count]) => ({ value, label: `${value}-ниточные`, count }))
+
+  // Price range for slider (in KZT)
+  const priceRange =
+    priceMax > priceMin && priceMin < Infinity
+      ? { min: Math.floor(priceMin), max: Math.ceil(priceMax) }
+      : undefined
+
+  // Spec-based post-filter: collect matching product IDs
+  const hasSpecFilters =
+    (filters.platformType?.length || 0) > 0 ||
+    (filters.stitchType?.length || 0) > 0 ||
+    (filters.motorType?.length || 0) > 0 ||
+    (filters.lubricationType?.length || 0) > 0 ||
+    (filters.threadCount?.length || 0) > 0
+
+  let specFilteredIds: number[] | null = null
+  if (hasSpecFilters) {
+    specFilteredIds = allForFilters.docs
+      .filter((p) => {
+        const spec = productSpecs.get(p.id)
+        if (!spec) return false
+
+        if (filters.platformType?.length && (!spec.platform || !filters.platformType.includes(spec.platform)))
+          return false
+        if (filters.stitchType?.length && (!spec.stitch || !filters.stitchType.includes(spec.stitch)))
+          return false
+        if (filters.motorType?.length && (!spec.motor || !filters.motorType.includes(spec.motor)))
+          return false
+        if (filters.lubricationType?.length && (!spec.lubrication || !filters.lubricationType.includes(spec.lubrication)))
+          return false
+        if (filters.threadCount?.length && (!spec.threads || !filters.threadCount.includes(spec.threads)))
+          return false
+
+        return true
+      })
+      .map((p) => p.id)
+  }
+
+  // Build the where clause, adding spec-filtered IDs constraint if needed
+  let where = buildPayloadWhere(baseWhere, filters)
+  if (specFilteredIds !== null) {
+    if (specFilteredIds.length === 0) {
+      // No products match spec filters — force empty result
+      where = { and: [baseWhere, { id: { equals: -1 } }] }
+    } else {
+      where = buildPayloadWhere(
+        { and: [baseWhere, { id: { in: specFilteredIds } }] },
+        filters,
+      )
+    }
+  }
+
+  // Fetch products with filters
+  const products = await payload.find({
+    collection: 'products',
+    where,
+    sort,
+    page,
+    limit: perPage,
+    depth: 1,
+  })
+
   const activeFilterCount =
     (filters.brand?.length || 0) +
     (filters.machineType?.length || 0) +
     (filters.purpose?.length || 0) +
     (filters.needleCount?.length || 0) +
+    (filters.platformType?.length || 0) +
+    (filters.stitchType?.length || 0) +
+    (filters.motorType?.length || 0) +
+    (filters.lubricationType?.length || 0) +
+    (filters.threadCount?.length || 0) +
     (filters.inStock ? 1 : 0) +
     (filters.isNew ? 1 : 0) +
     (filters.isFeatured ? 1 : 0) +
@@ -165,10 +317,20 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
       machineTypes={typeOptions}
       purposes={purposeOptions}
       needleCounts={needleOptions}
+      platformTypes={platformOptions}
+      stitchTypes={stitchOptions}
+      motorTypes={motorOptions}
+      lubricationTypes={lubricationOptions}
+      threadCounts={threadOptions}
       activeBrands={filters.brand || []}
       activeTypes={filters.machineType || []}
       activePurposes={filters.purpose || []}
       activeNeedles={filters.needleCount || []}
+      activePlatforms={filters.platformType || []}
+      activeStitches={filters.stitchType || []}
+      activeMotors={filters.motorType || []}
+      activeLubrications={filters.lubricationType || []}
+      activeThreads={filters.threadCount || []}
       activeInStock={filters.inStock || false}
       activeIsNew={filters.isNew || false}
       activeIsFeatured={filters.isFeatured || false}
@@ -177,6 +339,7 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
       activeSpeedMin={filters.speedMin}
       activeSpeedMax={filters.speedMax}
       hasSpeedData={hasSpeedData}
+      priceRange={priceRange}
     />
   )
 
