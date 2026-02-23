@@ -389,7 +389,7 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
       <div className="flex gap-8">
         {/* Filters sidebar — desktop */}
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-4 bg-white border border-gray-200 rounded-xl p-5">
+          <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto bg-white border border-gray-200 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Фильтры</h2>
             {filtersComponent}
           </div>
