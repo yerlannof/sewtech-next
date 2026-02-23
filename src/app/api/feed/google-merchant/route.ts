@@ -1,11 +1,13 @@
 import { NextResponse } from 'next/server'
 import { getPayload } from 'payload'
 import config from '@payload-config'
+import { getCurrencySettings, convertToKZT } from '@/lib/price'
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
 
 export async function GET() {
   const payload = await getPayload({ config })
+  const { exchangeRate } = await getCurrencySettings()
 
   const products = await payload.find({
     collection: 'products',
@@ -24,13 +26,14 @@ export async function GET() {
     const imageUrl = image?.sizes?.card?.url || image?.url || ''
     const brand = (p.brand as any)?.name || 'JUKI'
     const availability = p.inStock ? 'in_stock' : 'preorder'
+    const priceKZT = convertToKZT(p.price!, exchangeRate)
 
     return `
     <item>
       <g:id>${p.sku}</g:id>
       <title>${escapeXml(p.name)}</title>
       <link>${BASE_URL}/product/${p.slug}</link>
-      <g:price>${p.price} KZT</g:price>
+      <g:price>${priceKZT} KZT</g:price>
       <g:availability>${availability}</g:availability>
       <g:condition>new</g:condition>
       <g:brand>${escapeXml(brand)}</g:brand>

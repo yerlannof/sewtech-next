@@ -7,7 +7,7 @@ interface BreadcrumbItem {
 
 export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-gray-500 py-3">
+    <nav aria-label="Breadcrumb" className="text-sm text-gray-500 py-4">
       <ol
         className="flex flex-wrap items-center gap-1"
         itemScope
@@ -18,7 +18,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           itemScope
           itemType="https://schema.org/ListItem"
         >
-          <Link href="/" itemProp="item" className="hover:text-[#1B4F72] transition">
+          <Link href="/" itemProp="item" className="hover:text-[#1B4F72] hover:underline transition-colors">
             <span itemProp="name">Главная</span>
           </Link>
           <meta itemProp="position" content="1" />
@@ -33,7 +33,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           >
             <span className="text-gray-300">/</span>
             {item.href ? (
-              <Link href={item.href} itemProp="item" className="hover:text-[#1B4F72] transition">
+              <Link href={item.href} itemProp="item" className="hover:text-[#1B4F72] hover:underline transition-colors">
                 <span itemProp="name">{item.label}</span>
               </Link>
             ) : (

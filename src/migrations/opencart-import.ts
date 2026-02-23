@@ -316,7 +316,7 @@ async function main() {
 
       const result = await payload.create({
         collection: 'products',
-        data: productData,
+        data: productData as any,
       }) as unknown as { id: number }
 
       modelToId.set(p.model, result.id)

@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { CONTACTS } from '@/lib/contacts'
 
 const CATALOG_LINKS = [
   { label: 'Прямострочные', href: '/catalog/dlya-poshiva-odezhdy/odnoigolnaya-pryamostrochnaya' },
@@ -15,6 +16,8 @@ const INFO_LINKS = [
   { label: 'Гарантия и сервис', href: '/warranty' },
   { label: 'Блог', href: '/blog' },
   { label: 'Контакты', href: '/contacts' },
+  { label: 'Политика конфиденциальности', href: '/privacy' },
+  { label: 'Условия использования', href: '/terms' },
 ]
 
 export async function Footer() {
@@ -23,12 +26,15 @@ export async function Footer() {
   return (
     <>
       <footer className="bg-gray-900 text-gray-300">
+        {/* Gradient accent line */}
+        <div className="h-1 bg-gradient-to-r from-[#1B4F72] via-[#2E86C1] to-[#1B4F72]" />
+
         {/* Main footer content */}
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* Company info */}
             <div>
-              <Link href="/" className="text-2xl font-bold text-white">
+              <Link href="/" className="text-2xl font-extrabold text-white tracking-tight">
                 SEWTECH
               </Link>
               <p className="mt-3 text-sm leading-relaxed text-gray-400">
@@ -40,7 +46,7 @@ export async function Footer() {
                   href="https://www.instagram.com/sewtech.kz/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition"
+                  className="text-gray-400 hover:text-white transition-colors"
                   aria-label="Instagram"
                 >
                   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -48,10 +54,10 @@ export async function Footer() {
                   </svg>
                 </a>
                 <a
-                  href="https://wa.me/77071234567"
+                  href={`https://wa.me/${CONTACTS.whatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-400 hover:text-white transition"
+                  className="text-gray-400 hover:text-white transition-colors"
                   aria-label="WhatsApp"
                 >
                   <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
@@ -69,7 +75,7 @@ export async function Footer() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-sm text-gray-400 hover:text-white transition"
+                      className="text-sm text-gray-400 hover:text-white transition-colors"
                     >
                       {item.label}
                     </Link>
@@ -86,7 +92,7 @@ export async function Footer() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-sm text-gray-400 hover:text-white transition"
+                      className="text-sm text-gray-400 hover:text-white transition-colors"
                     >
                       {item.label}
                     </Link>
@@ -120,7 +126,7 @@ export async function Footer() {
                       d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
-                  <span>г. Алматы, Казахстан</span>
+                  <span>{CONTACTS.address}</span>
                 </li>
                 <li className="flex gap-2">
                   <svg
@@ -137,8 +143,8 @@ export async function Footer() {
                       d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
                     />
                   </svg>
-                  <a href="tel:+77071234567" className="hover:text-white transition">
-                    +7 (707) 123-45-67
+                  <a href={`tel:${CONTACTS.phoneRaw}`} className="hover:text-white transition-colors">
+                    {CONTACTS.phone}
                   </a>
                 </li>
                 <li className="flex gap-2">
@@ -156,8 +162,8 @@ export async function Footer() {
                       d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                     />
                   </svg>
-                  <a href="mailto:info@sewtech.kz" className="hover:text-white transition">
-                    info@sewtech.kz
+                  <a href={`mailto:${CONTACTS.email}`} className="hover:text-white transition-colors">
+                    {CONTACTS.email}
                   </a>
                 </li>
                 <li className="flex gap-2">
@@ -175,7 +181,7 @@ export async function Footer() {
                       d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span>Пн-Пт: 9:00 - 18:00</span>
+                  <span>Пн-Пт: {CONTACTS.hours.weekdays}</span>
                 </li>
               </ul>
             </div>
@@ -193,10 +199,10 @@ export async function Footer() {
 
       {/* Floating WhatsApp button */}
       <a
-        href="https://wa.me/77071234567"
+        href={`https://wa.me/${CONTACTS.whatsapp}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg transition hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl ring-4 ring-green-500/20 transition-all duration-200 hover:scale-110"
         aria-label="Написать в WhatsApp"
       >
         <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">

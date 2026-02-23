@@ -69,5 +69,22 @@ export const Categories: CollectionConfig = {
         position: 'sidebar',
       },
     },
+    {
+      name: 'showInMegaMenu',
+      type: 'checkbox',
+      label: 'Показывать в мега-меню',
+      defaultValue: true,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'icon',
+      type: 'text',
+      label: 'Иконка (emoji или CSS class)',
+      admin: {
+        position: 'sidebar',
+      },
+    },
   ],
 }

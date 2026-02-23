@@ -16,7 +16,7 @@ export default async function CatalogPage() {
   // Get parent categories (those without a parent)
   const parentCats = await payload.find({
     collection: 'categories',
-    where: { parent: { exists: false } },
+    where: { parent: { exists: false }, showInMegaMenu: { equals: true } },
     sort: 'sortOrder',
     limit: 100,
   })
@@ -34,7 +34,7 @@ export default async function CatalogPage() {
   )
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <Breadcrumbs items={[{ label: 'Каталог' }]} />
       <h1 className="text-3xl font-bold text-gray-900 mb-8">Каталог оборудования</h1>
 
@@ -49,9 +49,9 @@ export default async function CatalogPage() {
                 <Link
                   key={cat.id}
                   href={`/catalog/${(parent as Category).slug}/${cat.slug}`}
-                  className="block p-4 border rounded-lg hover:border-[#1B4F72] hover:shadow-md transition bg-white"
+                  className="group block p-5 border border-gray-200 rounded-xl hover:border-[#1B4F72] hover:shadow-lg transition-all duration-200 bg-white"
                 >
-                  <h3 className="font-medium text-gray-800">{cat.name}</h3>
+                  <h3 className="font-medium text-gray-800 group-hover:text-[#1B4F72] transition-colors">{cat.name}</h3>
                   {cat.description && (
                     <p className="text-sm text-gray-500 mt-1 line-clamp-2">{cat.description}</p>
                   )}

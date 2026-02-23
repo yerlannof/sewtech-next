@@ -25,3 +25,6 @@ next-env.d.ts
 
 # payload
 media/
+
+# migration data
+data/

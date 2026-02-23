@@ -64,6 +64,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    customers: CustomerAuthOperations;
   };
   blocks: {};
   collections: {
@@ -74,6 +75,8 @@ export interface Config {
     pages: Page;
     blog: Blog;
     users: User;
+    orders: Order;
+    customers: Customer;
     redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -89,6 +92,8 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     blog: BlogSelect<false> | BlogSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
+    customers: CustomersSelect<false> | CustomersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -110,13 +115,31 @@ export interface Config {
     settings: SettingsSelect<false> | SettingsSelect<true>;
   };
   locale: null;
-  user: User;
+  user: User | Customer;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface CustomerAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -146,8 +169,10 @@ export interface Product {
   brand?: (number | null) | Brand;
   category?: (number | null) | Category;
   subcategory?: (number | null) | Category;
+  /**
+   * Цена в долларах США. Отображение в тенге — через курс в Настройках сайта.
+   */
   price?: number | null;
-  priceUSD?: number | null;
   priceOnRequest?: boolean | null;
   shortDescription?: string | null;
   fullDescription?: {
@@ -165,6 +190,10 @@ export interface Product {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * HTML-описание из OpenCart. Отображается на сайте если fullDescription пустой.
+   */
+  descriptionHtml?: string | null;
   specifications?:
     | {
         name: string;
@@ -220,6 +249,8 @@ export interface Product {
         | 'other'
       )
     | null;
+  maxSpeed?: number | null;
+  needleCount?: number | null;
   purpose?: ('apparel' | 'non-apparel' | 'household') | null;
   relatedProducts?: (number | Product)[] | null;
   accessories?: (number | Product)[] | null;
@@ -317,6 +348,8 @@ export interface Category {
   description?: string | null;
   image?: (number | null) | Media;
   sortOrder?: number | null;
+  showInMegaMenu?: boolean | null;
+  icon?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -430,6 +463,61 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  orderNumber: string;
+  customerName: string;
+  customerPhone: string;
+  customerEmail?: string | null;
+  comment?: string | null;
+  items?:
+    | {
+        product?: (number | null) | Product;
+        productName: string;
+        quantity: number;
+        price?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  totalAmount?: number | null;
+  status?: ('new' | 'processing' | 'completed' | 'cancelled') | null;
+  customer?: (number | null) | Customer;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers".
+ */
+export interface Customer {
+  id: number;
+  name: string;
+  phone?: string | null;
+  city?: string | null;
+  company?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+  collection: 'customers';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -508,14 +596,27 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'orders';
+        value: number | Order;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: number | Customer;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: number | Redirect;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -525,10 +626,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user: {
-    relationTo: 'users';
-    value: number | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: number | User;
+      }
+    | {
+        relationTo: 'customers';
+        value: number | Customer;
+      };
   key?: string | null;
   value?:
     | {
@@ -565,10 +671,10 @@ export interface ProductsSelect<T extends boolean = true> {
   category?: T;
   subcategory?: T;
   price?: T;
-  priceUSD?: T;
   priceOnRequest?: T;
   shortDescription?: T;
   fullDescription?: T;
+  descriptionHtml?: T;
   specifications?:
     | T
     | {
@@ -605,6 +711,8 @@ export interface ProductsSelect<T extends boolean = true> {
   isNew?: T;
   isFeatured?: T;
   machineType?: T;
+  maxSpeed?: T;
+  needleCount?: T;
   purpose?: T;
   relatedProducts?: T;
   accessories?: T;
@@ -631,6 +739,8 @@ export interface CategoriesSelect<T extends boolean = true> {
   description?: T;
   image?: T;
   sortOrder?: T;
+  showInMegaMenu?: T;
+  icon?: T;
   meta?:
     | T
     | {
@@ -763,6 +873,57 @@ export interface BlogSelect<T extends boolean = true> {
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
   role?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  customerName?: T;
+  customerPhone?: T;
+  customerEmail?: T;
+  comment?: T;
+  items?:
+    | T
+    | {
+        product?: T;
+        productName?: T;
+        quantity?: T;
+        price?: T;
+        id?: T;
+      };
+  totalAmount?: T;
+  status?: T;
+  customer?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_select".
+ */
+export interface CustomersSelect<T extends boolean = true> {
+  name?: T;
+  phone?: T;
+  city?: T;
+  company?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -940,6 +1101,13 @@ export interface Setting {
    * Значение meta-тега yandex-verification для Яндекс.Вебмастера
    */
   yandexVerification?: string | null;
+  currency: {
+    /**
+     * Текущий курс доллара к тенге. Все цены в БД хранятся в USD.
+     */
+    exchangeRate: number;
+    displayCurrency?: ('KZT' | 'USD') | null;
+  };
   /**
    * Включить заглушку "сайт на обслуживании" для посетителей
    */
@@ -1040,6 +1208,12 @@ export interface SettingsSelect<T extends boolean = true> {
   googleAnalyticsId?: T;
   googleVerification?: T;
   yandexVerification?: T;
+  currency?:
+    | T
+    | {
+        exchangeRate?: T;
+        displayCurrency?: T;
+      };
   maintenanceMode?: T;
   updatedAt?: T;
   createdAt?: T;

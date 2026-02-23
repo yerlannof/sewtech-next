@@ -75,14 +75,11 @@ export const Products: CollectionConfig = {
     {
       name: 'price',
       type: 'number',
-      label: 'Цена (KZT)',
-      min: 0,
-    },
-    {
-      name: 'priceUSD',
-      type: 'number',
       label: 'Цена (USD)',
       min: 0,
+      admin: {
+        description: 'Цена в долларах США. Отображение в тенге — через курс в Настройках сайта.',
+      },
     },
     {
       name: 'priceOnRequest',
@@ -99,6 +96,14 @@ export const Products: CollectionConfig = {
       name: 'fullDescription',
       type: 'richText',
       label: 'Полное описание',
+    },
+    {
+      name: 'descriptionHtml',
+      type: 'textarea',
+      label: 'Описание (HTML)',
+      admin: {
+        description: 'HTML-описание из OpenCart. Отображается на сайте если fullDescription пустой.',
+      },
     },
     {
       name: 'specifications',
@@ -264,6 +269,24 @@ export const Products: CollectionConfig = {
         { label: 'Прессовая', value: 'pressing' },
         { label: 'Другое', value: 'other' },
       ],
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'maxSpeed',
+      type: 'number',
+      label: 'Макс. скорость (ст/мин)',
+      index: true,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'needleCount',
+      type: 'number',
+      label: 'Количество игл',
+      index: true,
       admin: {
         position: 'sidebar',
       },

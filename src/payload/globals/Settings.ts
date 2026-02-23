@@ -95,6 +95,33 @@ export const Settings: GlobalConfig = {
       },
     },
     {
+      name: 'currency',
+      type: 'group',
+      label: 'Валюта',
+      fields: [
+        {
+          name: 'exchangeRate',
+          type: 'number',
+          label: 'Курс USD → KZT',
+          defaultValue: 470,
+          required: true,
+          admin: {
+            description: 'Текущий курс доллара к тенге. Все цены в БД хранятся в USD.',
+          },
+        },
+        {
+          name: 'displayCurrency',
+          type: 'select',
+          label: 'Валюта отображения',
+          defaultValue: 'KZT',
+          options: [
+            { label: '₸ Тенге (KZT)', value: 'KZT' },
+            { label: '$ Доллар (USD)', value: 'USD' },
+          ],
+        },
+      ],
+    },
+    {
       name: 'maintenanceMode',
       type: 'checkbox',
       label: 'Режим обслуживания',

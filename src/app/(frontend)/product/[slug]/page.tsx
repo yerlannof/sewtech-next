@@ -4,8 +4,12 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
 import { ProductCard } from '@/components/catalog/ProductCard'
+import { ProductActions } from './ProductActions'
 import type { Metadata } from 'next'
 import type { Product, Brand, Category, Media } from '@/payload-types'
+import { sanitizeDescriptionHtml } from '@/lib/sanitize-html'
+import { CONTACTS } from '@/lib/contacts'
+import { getCurrencySettings, formatPrice, convertToKZT } from '@/lib/price'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -40,6 +44,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: metaTitle,
     description: metaDesc,
+    alternates: {
+      canonical: `/product/${slug}`,
+    },
     openGraph: {
       title: metaTitle,
       description: metaDesc,
@@ -49,14 +56,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('ru-RU').format(price)
-}
-
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params
-  const product = await getProduct(slug)
+  const [product, currencySettings] = await Promise.all([getProduct(slug), getCurrencySettings()])
   if (!product) notFound()
+
+  const { exchangeRate, displayCurrency } = currencySettings
 
   // Resolve populated relations with type safety
   const brand: Brand | null =
@@ -106,7 +111,7 @@ export default async function ProductPage({ params }: Props) {
     ...(hasPrice && {
       offers: {
         '@type': 'Offer',
-        price: product.price,
+        price: convertToKZT(product.price!, exchangeRate),
         priceCurrency: 'KZT',
         availability: product.inStock
           ? 'https://schema.org/InStock'
@@ -164,9 +169,11 @@ export default async function ProductPage({ params }: Props) {
     ],
   }
 
+  const hasDescription = !!(product.fullDescription || product.descriptionHtml)
+
   // Determine which tabs have content
   const tabs = [
-    ...(product.fullDescription ? [{ id: 'description', label: 'Описание' }] : []),
+    ...(hasDescription ? [{ id: 'description', label: 'Описание' }] : []),
     ...(specs.length > 0 ? [{ id: 'specs', label: 'Характеристики' }] : []),
     ...(faqs.length > 0 ? [{ id: 'faq', label: 'Вопросы и ответы' }] : []),
     ...(showErrorCodes ? [{ id: 'error-codes', label: 'Коды ошибок' }] : []),
@@ -190,15 +197,15 @@ export default async function ProductPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
 
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Breadcrumbs */}
         <Breadcrumbs items={breadcrumbItems} />
 
         {/* ========== TOP SECTION: Image + Info ========== */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-4 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mt-4 mb-12">
           {/* Left: Image gallery */}
           <div>
-            <div className="bg-white border rounded-lg p-4">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
               <div className="aspect-square relative">
                 {mainImageUrl ? (
                   <Image
@@ -238,7 +245,7 @@ export default async function ProductPage({ params }: Props) {
                     return (
                       <div
                         key={img.id ?? i}
-                        className="w-16 h-16 flex-shrink-0 border rounded relative hover:border-[#1B4F72] transition cursor-pointer"
+                        className="w-16 h-16 flex-shrink-0 border border-gray-200 rounded-lg relative hover:border-[#1B4F72] transition-colors cursor-pointer"
                       >
                         <Image
                           src={thumbUrl}
@@ -259,9 +266,9 @@ export default async function ProductPage({ params }: Props) {
           <div>
             {/* Brand badge */}
             {brand && (
-              <p className="text-sm font-medium text-[#1B4F72] mb-1 uppercase tracking-wide">
+              <span className="inline-block bg-blue-50 text-[#1B4F72] text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wide mb-3">
                 {brand.name}
-              </p>
+              </span>
             )}
 
             <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
@@ -275,10 +282,10 @@ export default async function ProductPage({ params }: Props) {
             )}
 
             {/* Price */}
-            <div className="mb-4">
+            <div className="bg-gray-50 rounded-xl p-4 mb-4">
               {hasPrice ? (
                 <p className="text-3xl font-bold text-[#1B4F72]">
-                  {formatPrice(product.price!)} &#8376;
+                  {formatPrice(product.price!, exchangeRate, displayCurrency)}
                 </p>
               ) : (
                 <p className="text-lg text-gray-500 italic">Цена по запросу</p>
@@ -309,13 +316,13 @@ export default async function ProductPage({ params }: Props) {
 
             {/* Key specs preview (first 5) */}
             {specs.length > 0 && (
-              <div className="border rounded-lg p-4 mb-6 bg-gray-50">
+              <div className="border border-gray-200 rounded-xl p-5 mb-6 bg-white shadow-sm">
                 <h3 className="font-medium text-sm text-gray-500 uppercase tracking-wide mb-3">
                   Основные характеристики
                 </h3>
-                <dl className="space-y-2">
-                  {specs.slice(0, 5).map((spec) => (
-                    <div key={spec.id ?? spec.name} className="flex justify-between text-sm gap-4">
+                <dl className="space-y-2.5">
+                  {specs.slice(0, 5).map((spec, i) => (
+                    <div key={spec.id ?? spec.name} className={`flex justify-between text-sm gap-4 ${i < Math.min(specs.length, 5) - 1 ? 'pb-2.5 border-b border-gray-100' : ''}`}>
                       <dt className="text-gray-600 shrink-0">{spec.name}</dt>
                       <dd className="text-gray-900 font-medium text-right">
                         {spec.value}
@@ -335,11 +342,22 @@ export default async function ProductPage({ params }: Props) {
               </div>
             )}
 
+            {/* Cart + Favorite + Compare */}
+            <ProductActions
+              product={{
+                id: product.id,
+                name: product.name,
+                slug: product.slug || '',
+                price: hasPrice ? product.price! : null,
+                imageUrl: mainImageUrl || null,
+              }}
+            />
+
             {/* CTA buttons */}
-            <div className="space-y-3">
+            <div className="space-y-3 mt-4">
               <a
-                href={`https://wa.me/77071234567?text=${encodeURIComponent(`Здравствуйте! Интересует ${product.name}${product.sku ? ` (арт. ${product.sku})` : ''}. Подскажите по наличию и цене.`)}`}
-                className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3.5 px-6 rounded-lg transition"
+                href={`https://wa.me/${CONTACTS.whatsapp}?text=${encodeURIComponent(`Здравствуйте! Интересует ${product.name}${product.sku ? ` (арт. ${product.sku})` : ''}. Подскажите по наличию и цене.`)}`}
+                className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -350,8 +368,8 @@ export default async function ProductPage({ params }: Props) {
               </a>
 
               <a
-                href="tel:+77071234567"
-                className="flex items-center justify-center gap-2 w-full border-2 border-[#1B4F72] text-[#1B4F72] hover:bg-[#1B4F72] hover:text-white font-medium py-3.5 px-6 rounded-lg transition"
+                href={`tel:${CONTACTS.phoneRaw}`}
+                className="flex items-center justify-center gap-2 w-full border-2 border-[#1B4F72] text-[#1B4F72] hover:bg-[#1B4F72] hover:text-white font-medium py-3 px-6 rounded-xl transition-all duration-200"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -369,31 +387,6 @@ export default async function ProductPage({ params }: Props) {
                 </svg>
                 Позвонить
               </a>
-
-              {!hasPrice && (
-                <a
-                  href={`https://wa.me/77071234567?text=${encodeURIComponent(`Здравствуйте! Хочу узнать цену на ${product.name}${product.sku ? ` (арт. ${product.sku})` : ''}.`)}`}
-                  className="flex items-center justify-center gap-2 w-full bg-[#1B4F72] hover:bg-[#163d5a] text-white font-medium py-3.5 px-6 rounded-lg transition"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                    />
-                  </svg>
-                  Запросить цену
-                </a>
-              )}
             </div>
           </div>
         </div>
@@ -406,7 +399,7 @@ export default async function ProductPage({ params }: Props) {
                 <li key={tab.id}>
                   <a
                     href={`#${tab.id}`}
-                    className="inline-block px-5 py-3 text-sm font-medium text-gray-600 hover:text-[#1B4F72] border-b-2 border-transparent hover:border-[#1B4F72] transition"
+                    className="inline-block px-6 py-3.5 text-sm font-semibold text-gray-600 hover:text-[#1B4F72] border-b-2 border-transparent hover:border-[#1B4F72] transition-colors"
                   >
                     {tab.label}
                   </a>
@@ -417,14 +410,19 @@ export default async function ProductPage({ params }: Props) {
         )}
 
         {/* ========== DESCRIPTION ========== */}
-        {product.fullDescription && (
+        {hasDescription && (
           <section className="mb-12" id="description">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Описание</h2>
-            <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
-              {/* Render Lexical richText as serialized HTML - for now show shortDescription fallback */}
-              {/* TODO: integrate @payloadcms/richtext-lexical/react serialize when available */}
-              {product.shortDescription && <p>{product.shortDescription}</p>}
-            </div>
+            {product.descriptionHtml ? (
+              <div
+                className="prose prose-sm max-w-none text-gray-700 leading-relaxed"
+                dangerouslySetInnerHTML={{ __html: sanitizeDescriptionHtml(product.descriptionHtml) }}
+              />
+            ) : product.fullDescription ? (
+              <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed">
+                {product.shortDescription && <p>{product.shortDescription}</p>}
+              </div>
+            ) : null}
           </section>
         )}
 
@@ -432,7 +430,7 @@ export default async function ProductPage({ params }: Props) {
         {specs.length > 0 && (
           <section className="mb-12" id="specs">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Характеристики</h2>
-            <div className="border rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-xl overflow-hidden shadow-sm">
               <table className="w-full">
                 <tbody>
                   {specs.map((spec, i) => (
@@ -440,10 +438,10 @@ export default async function ProductPage({ params }: Props) {
                       key={spec.id ?? i}
                       className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
                     >
-                      <td className="px-4 py-3 text-sm text-gray-600 w-1/2 border-r">
+                      <td className="px-5 py-3.5 text-sm text-gray-600 w-1/2 border-r border-gray-200">
                         {spec.name}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-900 font-medium">
+                      <td className="px-5 py-3.5 text-sm text-gray-900 font-medium">
                         {spec.value}
                         {spec.unit ? ` ${spec.unit}` : ''}
                       </td>
@@ -463,8 +461,8 @@ export default async function ProductPage({ params }: Props) {
             </h2>
             <div className="space-y-3">
               {faqs.map((faq, i) => (
-                <details key={faq.id ?? i} className="group border rounded-lg">
-                  <summary className="flex items-center justify-between px-4 py-3 cursor-pointer text-sm font-medium text-gray-800 hover:text-[#1B4F72] transition">
+                <details key={faq.id ?? i} className="group border border-gray-200 rounded-xl">
+                  <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-gray-800 hover:text-[#1B4F72] hover:bg-gray-50 transition-colors rounded-xl">
                     <span>{faq.question}</span>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -481,7 +479,7 @@ export default async function ProductPage({ params }: Props) {
                       />
                     </svg>
                   </summary>
-                  <div className="px-4 pb-4 text-sm text-gray-600 border-t pt-3 leading-relaxed">
+                  <div className="px-5 pb-4 text-sm text-gray-600 border-t border-gray-100 pt-3 leading-relaxed">
                     {faq.answer}
                   </div>
                 </details>
@@ -496,17 +494,17 @@ export default async function ProductPage({ params }: Props) {
             <h2 className="text-xl font-bold text-gray-900 mb-4">
               Коды ошибок
             </h2>
-            <div className="border rounded-lg overflow-hidden overflow-x-auto">
+            <div className="border border-gray-200 rounded-xl overflow-hidden overflow-x-auto shadow-sm">
               <table className="w-full text-sm">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-4 py-3 text-left text-gray-600 font-semibold w-24">
+                    <th className="px-5 py-3.5 text-left text-gray-600 font-semibold w-24">
                       Код
                     </th>
-                    <th className="px-4 py-3 text-left text-gray-600 font-semibold">
+                    <th className="px-5 py-3.5 text-left text-gray-600 font-semibold">
                       Описание
                     </th>
-                    <th className="px-4 py-3 text-left text-gray-600 font-semibold">
+                    <th className="px-5 py-3.5 text-left text-gray-600 font-semibold">
                       Решение
                     </th>
                   </tr>
@@ -517,13 +515,13 @@ export default async function ProductPage({ params }: Props) {
                       key={ec.id ?? i}
                       className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}
                     >
-                      <td className="px-4 py-2.5 font-mono font-medium text-[#1B4F72]">
+                      <td className="px-5 py-3 font-mono font-medium text-[#1B4F72]">
                         {ec.code}
                       </td>
-                      <td className="px-4 py-2.5 text-gray-700">
+                      <td className="px-5 py-3 text-gray-700">
                         {ec.description}
                       </td>
-                      <td className="px-4 py-2.5 text-gray-600">
+                      <td className="px-5 py-3 text-gray-600">
                         {ec.solution || '\u2014'}
                       </td>
                     </tr>
@@ -540,9 +538,9 @@ export default async function ProductPage({ params }: Props) {
             <h2 className="text-xl font-bold text-gray-900 mb-6">
               Похожие товары
             </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-5">
               {relatedProducts.slice(0, 6).map((rp) => (
-                <ProductCard key={rp.id} product={rp} />
+                <ProductCard key={rp.id} product={rp} exchangeRate={exchangeRate} displayCurrency={displayCurrency} />
               ))}
             </div>
           </section>

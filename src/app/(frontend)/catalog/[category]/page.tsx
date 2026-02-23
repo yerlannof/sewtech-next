@@ -21,6 +21,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${name} | SEWTECH Алматы`,
     description: `${name} — промышленные швейные машины JUKI. Купить в Алматы с доставкой по Казахстану.`,
+    alternates: {
+      canonical: `/catalog/${category}`,
+    },
+    openGraph: {
+      title: `${name} | SEWTECH Алматы`,
+      description: `${name} — промышленные швейные машины JUKI. Купить в Алматы с доставкой по Казахстану.`,
+    },
   }
 }
 
@@ -55,30 +62,34 @@ export default async function CategoryPage({ params }: Props) {
   )
 
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <Breadcrumbs
         items={[{ label: 'Каталог', href: '/catalog' }, { label: cat.name }]}
       />
 
       <h1 className="text-2xl font-bold text-gray-900 mb-2">{cat.name}</h1>
-      {cat.description && <p className="text-gray-600 mb-6">{cat.description}</p>}
+      {cat.description && (
+        <div className="text-gray-600 mb-6" dangerouslySetInnerHTML={{ __html: cat.description }} />
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {childrenWithCounts.map((child) => (
-          <Link
-            key={child.id}
-            href={`/catalog/${category}/${child.slug}`}
-            className="flex items-center justify-between p-4 bg-white border rounded-lg hover:border-[#1B4F72] hover:shadow-md transition"
-          >
-            <span className="font-medium text-gray-800">{child.name}</span>
-            <span className="text-sm text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-              {child.productCount}
-            </span>
-          </Link>
-        ))}
+        {childrenWithCounts
+          .filter((child) => child.productCount > 0)
+          .map((child) => (
+            <Link
+              key={child.id}
+              href={`/catalog/${category}/${child.slug}`}
+              className="group flex items-center justify-between p-5 bg-white border border-gray-200 rounded-xl hover:border-[#1B4F72] hover:shadow-lg transition-all duration-200"
+            >
+              <span className="font-medium text-gray-800 group-hover:text-[#1B4F72] transition-colors">{child.name}</span>
+              <span className="text-sm text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full group-hover:bg-[#1B4F72] group-hover:text-white transition-all duration-200">
+                {child.productCount}
+              </span>
+            </Link>
+          ))}
       </div>
 
-      {childrenWithCounts.length === 0 && (
+      {childrenWithCounts.filter((c) => c.productCount > 0).length === 0 && (
         <p className="text-gray-500 py-10 text-center">
           Подкатегории скоро появятся
         </p>

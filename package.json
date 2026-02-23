@@ -9,7 +9,11 @@
     "start": "next start",
     "generate:types": "payload generate:types",
     "generate:importmap": "payload generate:importmap",
-    "migrate": "tsx src/migrations/opencart-import.ts"
+    "migrate": "tsx src/migrations/opencart-import.ts",
+    "patch": "tsx src/migrations/patch-products.ts",
+    "extract": "python3 scripts/extract-opencart-data.py",
+    "download-images": "python3 scripts/download-opencart-images.py",
+    "full-import": "tsx src/migrations/full-import.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "^3.77.0",
@@ -17,7 +21,7 @@
     "@payloadcms/plugin-redirects": "^3.77.0",
     "@payloadcms/plugin-seo": "^3.77.0",
     "@payloadcms/richtext-lexical": "^3.77.0",
-    "@qdrant/js-client-rest": "^1.17.0",
+    "cheerio": "^1.2.0",
     "dotenv": "^17.3.1",
     "graphql": "^16.12.0",
     "next": "^15.4.11",

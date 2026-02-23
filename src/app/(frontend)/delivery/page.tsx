@@ -1,4 +1,5 @@
 import { Breadcrumbs } from '@/components/ui/Breadcrumbs'
+import { CONTACTS } from '@/lib/contacts'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -8,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function DeliveryPage() {
   return (
-    <div className="container mx-auto px-4 py-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <Breadcrumbs items={[{ label: 'Доставка и оплата' }]} />
       <h1 className="text-3xl font-bold text-gray-900 mb-6">Доставка и оплата</h1>
 
@@ -35,8 +36,8 @@ export default function DeliveryPage() {
 
         <p>
           По вопросам доставки и оплаты обращайтесь по телефону{' '}
-          <a href="tel:+77071234567">+7 (707) 123-45-67</a> или в{' '}
-          <a href="https://wa.me/77071234567" target="_blank" rel="noopener noreferrer">WhatsApp</a>.
+          <a href={`tel:${CONTACTS.phoneRaw}`}>{CONTACTS.phone}</a> или в{' '}
+          <a href={`https://wa.me/${CONTACTS.whatsapp}`} target="_blank" rel="noopener noreferrer">WhatsApp</a>.
         </p>
       </div>
     </div>

@@ -14,6 +14,8 @@ import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Blog } from './collections/Blog'
 import { Users } from './collections/Users'
+import { Orders } from './collections/Orders'
+import { Customers } from './collections/Customers'
 import { Header } from './globals/Header'
 import { Footer } from './globals/Footer'
 import { Settings } from './globals/Settings'
@@ -32,7 +34,7 @@ export default buildConfig({
     },
   },
 
-  collections: [Products, Categories, Brands, Media, Pages, Blog, Users],
+  collections: [Products, Categories, Brands, Media, Pages, Blog, Users, Orders, Customers],
 
   globals: [Header, Footer, Settings],
 

@@ -37,12 +37,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Categories
   const parentCats = await payload.find({
     collection: 'categories',
-    where: { parent: { exists: false } },
+    where: { parent: { exists: false }, showInMegaMenu: { equals: true } },
     limit: 100,
   })
   const allCats = await payload.find({
     collection: 'categories',
-    limit: 100,
+    limit: 200,
   })
 
   const categoryPages: MetadataRoute.Sitemap = []

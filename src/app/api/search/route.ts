@@ -1,33 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { searchProducts } from '@/lib/qdrant'
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('q') || ''
   const limit = parseInt(request.nextUrl.searchParams.get('limit') || '12')
 
   if (!query || query.length < 2) {
-    return NextResponse.json({ docs: [], totalDocs: 0, query })
+    return NextResponse.json({ docs: [], totalDocs: 0, query, source: 'none' })
   }
 
-  const payload = await getPayload({ config })
-
-  // Search by name using Payload's built-in like operator
-  const results = await payload.find({
-    collection: 'products',
-    where: {
-      or: [
-        { name: { like: query } },
-        { sku: { like: query } },
-      ],
-    },
-    limit,
-    sort: 'name',
-    depth: 1,
-  })
+  const result = await searchProducts(query, limit)
 
   return NextResponse.json({
-    docs: results.docs.map((doc) => ({
+    docs: result.products.map((doc) => ({
       id: doc.id,
       name: doc.name,
       slug: doc.slug,
@@ -37,7 +22,10 @@ export async function GET(request: NextRequest) {
       inStock: doc.inStock,
       image: (doc.images as any)?.[0]?.sizes?.thumbnail?.url || null,
     })),
-    totalDocs: results.totalDocs,
+    totalDocs: result.products.length,
     query,
+    source: result.source,
+    chunksFound: result.chunksFound,
+    retrievalTimeMs: result.retrievalTimeMs,
   })
 }
