@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: payload
+      POSTGRES_DB: sewtech
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Qdrant is shared from rag-geologist project (port 6333)
+
+volumes:
+  postgres_data:
