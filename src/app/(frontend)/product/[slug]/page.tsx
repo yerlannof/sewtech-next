@@ -206,7 +206,7 @@ export default async function ProductPage({ params }: Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mt-4 mb-12">
           {/* Left: Image gallery */}
           <div>
-            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div className="bg-white border border-gray-100 rounded-xl p-6 shadow-[var(--shadow-card)]">
               <div className="aspect-square relative">
                 {mainImageUrl ? (
                   <Image
@@ -247,7 +247,7 @@ export default async function ProductPage({ params }: Props) {
                     return (
                       <div
                         key={img.id ?? i}
-                        className="w-16 h-16 flex-shrink-0 border border-gray-200 rounded-lg relative hover:border-[#1B4F72] transition-colors cursor-pointer"
+                        className="w-[4.5rem] h-[4.5rem] flex-shrink-0 border border-gray-200 rounded-md relative hover:border-[#1B4F72] transition-colors cursor-pointer"
                       >
                         <Image
                           src={thumbUrl}
@@ -284,7 +284,7 @@ export default async function ProductPage({ params }: Props) {
             )}
 
             {/* Price */}
-            <div className="bg-gray-50 rounded-xl p-4 mb-4">
+            <div className="bg-gradient-to-r from-gray-50 to-gray-50/50 rounded-xl p-5 mb-4">
               {hasPrice ? (
                 <p className="text-3xl font-bold text-[#1B4F72]">
                   {formatPrice(product.price!, exchangeRate, displayCurrency)}
@@ -359,7 +359,7 @@ export default async function ProductPage({ params }: Props) {
             <div className="space-y-3 mt-4">
               <a
                 href={`https://wa.me/${CONTACTS.whatsapp}?text=${encodeURIComponent(`Здравствуйте! Интересует ${product.name}${product.sku ? ` (арт. ${product.sku})` : ''}. Подскажите по наличию и цене.`)}`}
-                className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200"
+                className="flex items-center justify-center gap-2 w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -371,7 +371,7 @@ export default async function ProductPage({ params }: Props) {
 
               <a
                 href={`tel:${CONTACTS.phoneRaw}`}
-                className="flex items-center justify-center gap-2 w-full border-2 border-[#1B4F72] text-[#1B4F72] hover:bg-[#1B4F72] hover:text-white font-medium py-3 px-6 rounded-xl transition-all duration-200"
+                className="flex items-center justify-center gap-2 w-full border border-[#1B4F72] text-[#1B4F72] hover:bg-[#1B4F72] hover:text-white font-medium py-3 px-6 rounded-xl transition-all duration-200"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -401,7 +401,7 @@ export default async function ProductPage({ params }: Props) {
                 <li key={tab.id}>
                   <a
                     href={`#${tab.id}`}
-                    className="inline-block px-6 py-3.5 text-sm font-semibold text-gray-600 hover:text-[#1B4F72] border-b-2 border-transparent hover:border-[#1B4F72] transition-colors"
+                    className="inline-block px-6 py-3.5 text-sm font-semibold text-gray-600 hover:text-[#1B4F72] border-b-[3px] border-transparent hover:border-[#1B4F72] transition-colors"
                   >
                     {tab.label}
                   </a>
@@ -438,9 +438,9 @@ export default async function ProductPage({ params }: Props) {
                   {specs.map((spec, i) => (
                     <tr
                       key={spec.id ?? i}
-                      className={i % 2 === 0 ? 'bg-gray-50' : 'bg-white'}
+                      className={i % 2 === 0 ? 'bg-gray-50/70' : 'bg-white'}
                     >
-                      <td className="px-5 py-3.5 text-sm text-gray-600 w-1/2 border-r border-gray-200">
+                      <td className="px-5 py-3.5 text-sm text-gray-600 w-1/2 border-r border-gray-100">
                         {spec.name}
                       </td>
                       <td className="px-5 py-3.5 text-sm text-gray-900 font-medium">
@@ -463,7 +463,7 @@ export default async function ProductPage({ params }: Props) {
             </h2>
             <div className="space-y-3">
               {faqs.map((faq, i) => (
-                <details key={faq.id ?? i} className="group border border-gray-200 rounded-xl">
+                <details key={faq.id ?? i} className="group border border-gray-100 rounded-xl open:shadow-sm open:border-gray-200 transition-all">
                   <summary className="flex items-center justify-between px-5 py-4 cursor-pointer text-sm font-medium text-gray-800 hover:text-[#1B4F72] hover:bg-gray-50 transition-colors rounded-xl">
                     <span>{faq.question}</span>
                     <svg
@@ -536,7 +536,7 @@ export default async function ProductPage({ params }: Props) {
 
         {/* ========== RELATED PRODUCTS ========== */}
         {relatedProducts.length > 0 && (
-          <section className="border-t pt-10 mt-4">
+          <section className="border-t border-gray-100 pt-12 mt-4">
             <h2 className="text-xl font-bold text-gray-900 mb-6">
               Похожие товары
             </h2>

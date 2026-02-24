@@ -41,7 +41,7 @@ export default async function CatalogPage() {
       <div className="space-y-10">
         {categoriesWithChildren.map(({ parent, children }) => (
           <section key={parent.id}>
-            <h2 className="text-xl font-semibold text-[#1B4F72] mb-4 border-b pb-2">
+            <h2 className="text-lg font-semibold text-[#1B4F72] mb-4 uppercase tracking-wide after:content-[''] after:block after:w-12 after:h-0.5 after:bg-[#1B4F72] after:mt-2 after:rounded-full">
               {parent.name}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -49,7 +49,7 @@ export default async function CatalogPage() {
                 <Link
                   key={cat.id}
                   href={`/catalog/${(parent as Category).slug}/${cat.slug}`}
-                  className="group block p-5 border border-gray-200 rounded-xl hover:border-[#1B4F72] hover:shadow-lg transition-all duration-200 bg-white"
+                  className="group block p-5 border border-gray-200 rounded-xl hover:border-[#1B4F72] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 bg-white"
                 >
                   <h3 className="font-medium text-gray-800 group-hover:text-[#1B4F72] transition-colors">{cat.name}</h3>
                   {cat.description && (

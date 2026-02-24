@@ -389,7 +389,7 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
       <div className="flex gap-8">
         {/* Filters sidebar — desktop */}
         <aside className="hidden lg:block w-64 shrink-0">
-          <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto bg-white border border-gray-200 rounded-xl p-5">
+          <div className="sticky top-4 max-h-[calc(100vh-2rem)] overflow-y-auto bg-white border border-gray-100 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-gray-900 mb-4 uppercase tracking-wide">Фильтры</h2>
             {filtersComponent}
           </div>
@@ -405,7 +405,7 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
             </p>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                 {products.docs.map((product) => (
                   <ProductCard key={product.id} product={product} exchangeRate={exchangeRate} displayCurrency={displayCurrency} />
                 ))}
@@ -417,7 +417,7 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
                   {page > 1 && (
                     <Link
                       href={paginationUrl(page - 1)}
-                      className="px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm transition-colors"
+                      className="px-3 py-2 rounded-md text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm transition-colors min-w-[2.5rem] text-center"
                     >
                       &larr;
                     </Link>
@@ -426,9 +426,9 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
                     <Link
                       key={p}
                       href={paginationUrl(p)}
-                      className={`px-3 py-2 rounded-lg text-sm shadow-sm transition-colors ${
+                      className={`px-3 py-2 rounded-md text-sm shadow-sm transition-colors min-w-[2.5rem] text-center ${
                         p === page
-                          ? 'bg-[#1B4F72] text-white'
+                          ? 'bg-[#1B4F72] text-white shadow-md'
                           : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
@@ -438,7 +438,7 @@ export default async function SubcategoryPage({ params, searchParams }: Props) {
                   {page < products.totalPages && (
                     <Link
                       href={paginationUrl(page + 1)}
-                      className="px-3 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm transition-colors"
+                      className="px-3 py-2 rounded-md text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 shadow-sm transition-colors min-w-[2.5rem] text-center"
                     >
                       &rarr;
                     </Link>
@@ -490,12 +490,12 @@ function SortSelect({
       <label className="text-sm text-gray-500 whitespace-nowrap hidden sm:inline">
         Сортировка:
       </label>
-      <div className="relative">
+      <div className="flex gap-1.5 flex-wrap">
         {options.map((opt) => (
           <Link
             key={opt.value}
             href={`/catalog/${category}/${subcategory}?sort=${opt.value}`}
-            className={`inline-block px-3 py-1.5 text-xs rounded-full mr-1 transition-colors ${
+            className={`inline-block px-3 py-1.5 text-xs rounded-full transition-colors ${
               currentSort === opt.value
                 ? 'bg-[#1B4F72] text-white shadow-sm'
                 : 'bg-gray-100 text-gray-600 hover:bg-gray-200'

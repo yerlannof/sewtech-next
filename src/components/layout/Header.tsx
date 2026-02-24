@@ -66,7 +66,7 @@ export async function Header() {
     <header>
       {/* Top bar */}
       <div className="bg-gradient-to-r from-[#1B4F72] to-[#1a5a80] text-white text-sm">
-        <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+        <div className="container mx-auto px-4 py-1.5 flex justify-between items-center">
           <a href={`tel:${CONTACTS.phoneRaw}`} className="hover:text-blue-200 transition-colors">
             {CONTACTS.phone}
           </a>
@@ -85,10 +85,10 @@ export async function Header() {
       </div>
 
       {/* Main bar */}
-      <div className="bg-white border-b shadow-sm relative">
+      <div className="bg-white border-b relative">
         <div className="container mx-auto px-4 py-3 flex items-center gap-4">
           <Link href="/" className="shrink-0 flex items-center gap-2">
-            <span className="text-2xl font-extrabold text-[#1B4F72] tracking-tight">SEWTECH</span>
+            <span className="text-[1.6rem] leading-none font-extrabold text-[#1B4F72] tracking-tight">SEWTECH</span>
             <span className="hidden lg:inline text-xs text-gray-400 border-l border-gray-200 pl-2">Швейное оборудование</span>
           </Link>
 
@@ -100,7 +100,7 @@ export async function Header() {
                   type="search"
                   name="q"
                   placeholder="Поиск по каталогу..."
-                  className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-[#1B4F72]/30 focus:border-[#1B4F72] transition-all"
+                  className="w-full bg-gray-50/70 border border-gray-200/80 rounded-lg px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-[#1B4F72]/30 focus:border-[#1B4F72] transition-all"
                 />
                 <button
                   type="submit"
@@ -145,7 +145,7 @@ export async function Header() {
       </div>
 
       {/* Navigation */}
-      <nav className="bg-white border-b hidden md:block">
+      <nav className="bg-white border-b border-gray-100 hidden md:block">
         <div className="container mx-auto px-4">
           <ul className="flex gap-0 py-0 text-sm items-center">
             <li>
@@ -155,7 +155,7 @@ export async function Header() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className="inline-block px-4 py-2.5 text-gray-600 hover:text-[#1B4F72] hover:bg-blue-50/50 font-medium transition-colors rounded-lg"
+                  className="inline-block px-4 py-2.5 text-gray-600 hover:text-[#1B4F72] hover:bg-blue-50/50 font-medium transition-colors rounded-md"
                 >
                   {item.label}
                 </Link>

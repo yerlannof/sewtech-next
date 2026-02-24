@@ -18,7 +18,7 @@ export function ProductCard({ product, exchangeRate = 470, displayCurrency = 'KZ
   const imageUrl = getImageUrl(media)
 
   return (
-    <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300">
+    <div className="group relative bg-white border border-gray-100 rounded-xl overflow-hidden shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] hover:-translate-y-0.5 transition-all duration-300">
       {/* Action buttons overlay */}
       <ProductCardActions
         product={{
@@ -63,12 +63,12 @@ export function ProductCard({ product, exchangeRate = 470, displayCurrency = 'KZ
           {/* Badges */}
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {product.inStock && (
-              <span className="bg-green-500 text-white text-[11px] px-2.5 py-0.5 rounded-full font-medium shadow-sm">
+              <span className="bg-emerald-500 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
                 В наличии
               </span>
             )}
             {product.isNew && (
-              <span className="bg-orange-500 text-white text-[11px] px-2.5 py-0.5 rounded-full font-medium shadow-sm">
+              <span className="bg-orange-500 text-white text-xs px-3 py-1 rounded-full font-medium shadow-sm">
                 Новинка
               </span>
             )}
@@ -85,7 +85,7 @@ export function ProductCard({ product, exchangeRate = 470, displayCurrency = 'KZ
           {product.specifications && product.specifications.length > 0 && (
             <div className="mt-1.5 space-y-0.5">
               {product.specifications.slice(0, 2).map((spec) => (
-                <p key={spec.id || spec.name} className="text-xs text-gray-400 truncate">
+                <p key={spec.id || spec.name} className="text-xs text-gray-500 truncate">
                   {spec.name}: {spec.value}
                   {spec.unit ? ` ${spec.unit}` : ''}
                 </p>
@@ -94,9 +94,9 @@ export function ProductCard({ product, exchangeRate = 470, displayCurrency = 'KZ
           )}
 
           {/* Price */}
-          <div className="mt-3 pt-3 border-t border-gray-100">
+          <div className="mt-3 pt-3 border-t border-gray-50">
             {product.price && product.price > 0 && !product.priceOnRequest ? (
-              <p className="text-lg font-bold text-[#1B4F72]">
+              <p className="text-lg font-bold text-[#1B4F72] tracking-tight">
                 {formatPrice(product.price, exchangeRate, displayCurrency)}
               </p>
             ) : (

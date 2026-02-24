@@ -79,10 +79,10 @@ export default async function CategoryPage({ params }: Props) {
             <Link
               key={child.id}
               href={`/catalog/${category}/${child.slug}`}
-              className="group flex items-center justify-between p-5 bg-white border border-gray-200 rounded-xl hover:border-[#1B4F72] hover:shadow-lg transition-all duration-200"
+              className="group flex items-center justify-between p-5 bg-white border border-gray-200 rounded-xl hover:border-[#1B4F72] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
             >
               <span className="font-medium text-gray-800 group-hover:text-[#1B4F72] transition-colors">{child.name}</span>
-              <span className="text-sm text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full group-hover:bg-[#1B4F72] group-hover:text-white transition-all duration-200">
+              <span className="text-sm text-gray-500 bg-gray-100 px-2.5 py-0.5 rounded-full group-hover:bg-[#1B4F72]/90 group-hover:text-white transition-all duration-200">
                 {child.productCount}
               </span>
             </Link>
@@ -90,7 +90,7 @@ export default async function CategoryPage({ params }: Props) {
       </div>
 
       {childrenWithCounts.filter((c) => c.productCount > 0).length === 0 && (
-        <p className="text-gray-500 py-10 text-center">
+        <p className="text-gray-400 py-16 text-center">
           Подкатегории скоро появятся
         </p>
       )}

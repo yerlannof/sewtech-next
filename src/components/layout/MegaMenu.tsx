@@ -69,7 +69,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
       </Link>
 
       {open && (
-        <div className="absolute top-full left-0 mt-0 bg-white border border-gray-200 rounded-xl shadow-xl z-50 flex max-h-[420px] min-w-[580px]">
+        <div className="absolute top-full left-0 mt-0 bg-white border border-gray-200 rounded-xl shadow-xl ring-1 ring-black/5 z-50 flex max-h-[420px] min-w-[580px]">
           {/* Left panel — root categories */}
           <div className="w-56 border-r border-gray-100 py-2 shrink-0 flex flex-col">
             <div className="flex-1 overflow-y-auto">
@@ -79,7 +79,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                   href={`/catalog/${cat.slug}`}
                   className={`flex items-center gap-2 px-4 py-2.5 text-sm transition-colors ${
                     i === activeRoot
-                      ? 'bg-blue-50 text-[#1B4F72] font-semibold border-r-2 border-[#1B4F72]'
+                      ? 'bg-blue-50 text-[#1B4F72] font-semibold border-l-2 border-[#1B4F72]'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-[#1B4F72]'
                   }`}
                   onMouseEnter={() => setActiveRoot(i)}
@@ -124,7 +124,7 @@ export function MegaMenu({ categories }: MegaMenuProps) {
                     <Link
                       key={child.slug}
                       href={`/catalog/${activeCat.slug}/${child.slug}`}
-                      className="text-sm text-gray-600 hover:text-[#1B4F72] transition-colors py-1.5 block"
+                      className="text-sm text-gray-600 hover:text-[#1B4F72] hover:bg-gray-50 rounded-md px-2 -mx-2 transition-colors py-1.5 block"
                       onClick={() => setOpen(false)}
                     >
                       {child.name}

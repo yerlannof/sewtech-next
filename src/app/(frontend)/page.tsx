@@ -31,8 +31,8 @@ export default async function HomePage() {
       {/* Hero */}
       <section className="relative bg-gradient-to-br from-[#1B4F72] via-[#1a5a80] to-[#2E86C1] text-white py-20 md:py-28 overflow-hidden">
         {/* Decorative circles */}
-        <div className="absolute top-[-80px] right-[-80px] w-[300px] h-[300px] rounded-full bg-white/5" />
-        <div className="absolute bottom-[-120px] left-[-60px] w-[400px] h-[400px] rounded-full bg-white/5" />
+        <div className="absolute top-[-80px] right-[-80px] w-[300px] h-[300px] rounded-full bg-white/[0.03]" />
+        <div className="absolute bottom-[-120px] left-[-60px] w-[400px] h-[400px] rounded-full bg-white/[0.03]" />
 
         <div className="container mx-auto px-4 text-center relative z-10">
           <span className="inline-block bg-white/15 backdrop-blur-sm text-sm font-medium px-4 py-1.5 rounded-full mb-6 tracking-wide">
@@ -65,7 +65,7 @@ export default async function HomePage() {
       </section>
 
       {/* Categories */}
-      <section className="py-16 md:py-20 bg-gray-50">
+      <section className="py-20 md:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-gray-900 mb-8">Каталог оборудования</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
@@ -73,9 +73,9 @@ export default async function HomePage() {
               <Link
                 key={cat.id}
                 href={`/catalog/${cat.slug}`}
-                className="group bg-white p-6 rounded-xl border border-gray-200 hover:border-[#1B4F72] hover:shadow-lg transition-all duration-200 text-center"
+                className="group bg-white p-6 rounded-2xl border border-gray-200 hover:border-[#1B4F72] hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 text-center"
               >
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-[#1B4F72] transition-colors duration-200">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-[#1B4F72] transition-colors duration-200">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#1B4F72] group-hover:text-white transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
@@ -89,7 +89,7 @@ export default async function HomePage() {
 
       {/* Featured products */}
       {featured.docs.length > 0 && (
-        <section className="py-16 md:py-20">
+        <section className="py-20 md:py-24">
           <div className="container mx-auto px-4">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900">В наличии в Алматы</h2>
@@ -107,7 +107,7 @@ export default async function HomePage() {
       )}
 
       {/* Advantages */}
-      <section className="py-16 md:py-20 bg-gray-50">
+      <section className="py-20 md:py-24 bg-gray-50">
         <div className="container mx-auto px-4">
           <h2 className="text-2xl font-bold text-gray-900 mb-10 text-center">Почему SEWTECH?</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -141,7 +141,7 @@ export default async function HomePage() {
                 ),
               },
             ].map((item) => (
-              <div key={item.title} className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <div key={item.title} className="bg-white p-6 rounded-xl border border-gray-200 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow duration-200">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center text-[#1B4F72] mb-4">
                   {item.icon}
                 </div>

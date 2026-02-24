@@ -27,7 +27,7 @@ export async function Footer() {
     <>
       <footer className="bg-gray-900 text-gray-300">
         {/* Gradient accent line */}
-        <div className="h-1 bg-gradient-to-r from-[#1B4F72] via-[#2E86C1] to-[#1B4F72]" />
+        <div className="h-px bg-gradient-to-r from-[#1B4F72] via-[#2E86C1] to-[#1B4F72]" />
 
         {/* Main footer content */}
         <div className="container mx-auto px-4 py-12">
@@ -69,8 +69,8 @@ export async function Footer() {
 
             {/* Catalog links */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Каталог</h3>
-              <ul className="space-y-2">
+              <h3 className="text-white font-semibold mb-4 text-xs uppercase tracking-wide">Каталог</h3>
+              <ul className="space-y-2.5">
                 {CATALOG_LINKS.map((item) => (
                   <li key={item.href}>
                     <Link
@@ -86,8 +86,8 @@ export async function Footer() {
 
             {/* Info links */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Информация</h3>
-              <ul className="space-y-2">
+              <h3 className="text-white font-semibold mb-4 text-xs uppercase tracking-wide">Информация</h3>
+              <ul className="space-y-2.5">
                 {INFO_LINKS.map((item) => (
                   <li key={item.href}>
                     <Link
@@ -103,7 +103,7 @@ export async function Footer() {
 
             {/* Contacts */}
             <div>
-              <h3 className="text-white font-semibold mb-4">Контакты</h3>
+              <h3 className="text-white font-semibold mb-4 text-xs uppercase tracking-wide">Контакты</h3>
               <ul className="space-y-3 text-sm text-gray-400">
                 <li className="flex gap-2">
                   <svg
@@ -189,7 +189,7 @@ export async function Footer() {
         </div>
 
         {/* Copyright bar */}
-        <div className="border-t border-gray-800">
+        <div className="border-t border-gray-800/50">
           <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-gray-500">
             <span>&copy; {currentYear} SEWTECH. Все права защищены.</span>
             <span>Промышленные швейные машины в Алматы</span>
@@ -202,7 +202,7 @@ export async function Footer() {
         href={`https://wa.me/${CONTACTS.whatsapp}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl ring-4 ring-green-500/20 transition-all duration-200 hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl ring-4 ring-green-500/20 transition-all duration-200 hover:scale-110 hover:shadow-[0_8px_25px_rgba(34,197,94,0.4)]"
         aria-label="Написать в WhatsApp"
       >
         <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">

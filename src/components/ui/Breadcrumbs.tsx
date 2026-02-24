@@ -18,7 +18,7 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
           itemScope
           itemType="https://schema.org/ListItem"
         >
-          <Link href="/" itemProp="item" className="hover:text-[#1B4F72] hover:underline transition-colors">
+          <Link href="/" itemProp="item" className="hover:text-[var(--color-primary)] hover:underline transition-colors">
             <span itemProp="name">Главная</span>
           </Link>
           <meta itemProp="position" content="1" />
@@ -31,13 +31,13 @@ export function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
             itemScope
             itemType="https://schema.org/ListItem"
           >
-            <span className="text-gray-300">/</span>
+            <span className="text-gray-300">›</span>
             {item.href ? (
-              <Link href={item.href} itemProp="item" className="hover:text-[#1B4F72] hover:underline transition-colors">
+              <Link href={item.href} itemProp="item" className="hover:text-[var(--color-primary)] hover:underline transition-colors">
                 <span itemProp="name">{item.label}</span>
               </Link>
             ) : (
-              <span itemProp="name" className="text-gray-700 font-medium">
+              <span itemProp="name" className="text-gray-900 font-semibold">
                 {item.label}
               </span>
             )}
