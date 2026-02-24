@@ -5,7 +5,6 @@ import { resolve } from 'path'
 
 const nextConfig: NextConfig = {
   images: {
-    quality: 90,
     formats: ['image/webp'],
     remotePatterns: [
       {
