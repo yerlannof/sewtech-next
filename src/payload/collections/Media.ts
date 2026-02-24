@@ -1,11 +1,21 @@
 import type { CollectionAfterReadHook, CollectionConfig } from 'payload'
-import blobMap from '../../data/blob-map.json'
+import { existsSync } from 'fs'
+import { resolve } from 'path'
 
-// Build lowercase lookup for case-insensitive matching
-const blobUrls = blobMap as Record<string, string>
-const blobUrlsLower: Record<string, string> = {}
-for (const [key, val] of Object.entries(blobUrls)) {
-  blobUrlsLower[key.toLowerCase()] = val
+// Only use blob fallback if media files are not on disk
+// Once Railway volume is populated, this hook does nothing
+let blobUrls: Record<string, string> = {}
+let blobUrlsLower: Record<string, string> = {}
+
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const blobMap = require('../../data/blob-map.json')
+  blobUrls = blobMap as Record<string, string>
+  for (const [key, val] of Object.entries(blobUrls)) {
+    blobUrlsLower[key.toLowerCase()] = val as string
+  }
+} catch {
+  // blob-map.json not found — media is served from disk
 }
 
 function getBlobUrl(filename: string | null | undefined): string | undefined {
@@ -16,20 +26,26 @@ function getBlobUrl(filename: string | null | undefined): string | undefined {
 const resolveBlobUrls: CollectionAfterReadHook = ({ doc }) => {
   if (!doc?.filename) return doc
 
-  // Replace main URL
+  // If the file exists on disk, Payload serves it natively — skip blob lookup
+  const mediaPath = resolve(process.cwd(), 'media', doc.filename)
+  if (existsSync(mediaPath)) return doc
+
+  // File not on disk — try blob URL fallback
   const mainBlob = getBlobUrl(doc.filename)
   if (mainBlob) {
     doc.url = mainBlob
   }
 
-  // Replace size variant URLs
   if (doc.sizes && typeof doc.sizes === 'object') {
     for (const sizeKey of Object.keys(doc.sizes)) {
       const size = doc.sizes[sizeKey]
       if (size?.filename) {
-        const sizeBlob = getBlobUrl(size.filename)
-        if (sizeBlob) {
-          size.url = sizeBlob
+        const sizePath = resolve(process.cwd(), 'media', size.filename)
+        if (!existsSync(sizePath)) {
+          const sizeBlob = getBlobUrl(size.filename)
+          if (sizeBlob) {
+            size.url = sizeBlob
+          }
         }
       }
     }
