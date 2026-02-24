@@ -18,6 +18,27 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Debug mode
+    if (searchParams.get('debug') === '1') {
+      const cwd = process.cwd()
+      const cwdMedia = existsSync(`${cwd}/media`)
+      const appMedia = existsSync('/app/media')
+      const cwdMediaFiles = cwdMedia ? readdirSync(`${cwd}/media`).slice(0, 5) : []
+      const appMediaFiles = appMedia ? readdirSync('/app/media').slice(0, 5) : []
+      const testFile = 'ddl-5550n-ddl-5550n-7_main-3.jpg'
+      return NextResponse.json({
+        cwd,
+        cwdMedia,
+        appMedia,
+        cwdMediaSample: cwdMediaFiles,
+        appMediaSample: appMediaFiles,
+        testFileInCwdMedia: existsSync(`${cwd}/media/${testFile}`),
+        testFileInAppMedia: existsSync(`/app/media/${testFile}`),
+        appMediaCount: appMedia ? readdirSync('/app/media').length : 0,
+        cwdMediaCount: cwdMedia ? readdirSync(`${cwd}/media`).length : 0,
+      })
+    }
+
     // Check if media already exists
     if (existsSync(MEDIA_DIR)) {
       const files = readdirSync(MEDIA_DIR)
