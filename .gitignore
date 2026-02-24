@@ -32,3 +32,4 @@ media/
 .agents/
 .claude/
 skills-lock.json
+.env.vercel
