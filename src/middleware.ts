@@ -23,15 +23,16 @@ const PLACEHOLDER_URL = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/20
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Media file redirect: /api/media/file/{filename} → blob URL
+  // Media file rewrite: /api/media/file/{filename} → blob URL
+  // Using rewrite (not redirect) so /_next/image optimization works
   if (pathname.startsWith('/api/media/file/')) {
     const filename = pathname.replace('/api/media/file/', '')
     const blobUrl = findBlobUrl(filename)
     if (blobUrl) {
-      return NextResponse.redirect(blobUrl, { status: 301 })
+      return NextResponse.rewrite(blobUrl)
     }
-    // Return placeholder SVG for missing images instead of 500
-    return NextResponse.redirect(PLACEHOLDER_URL, { status: 302 })
+    // Fallback: let Payload try to serve it (will 404 if not on disk)
+    return NextResponse.next()
   }
 
   // Also handle /media/{filename} direct paths
@@ -39,9 +40,9 @@ export function middleware(request: NextRequest) {
     const filename = pathname.replace('/media/', '')
     const blobUrl = findBlobUrl(filename)
     if (blobUrl) {
-      return NextResponse.redirect(blobUrl, { status: 301 })
+      return NextResponse.rewrite(blobUrl)
     }
-    return NextResponse.redirect(PLACEHOLDER_URL, { status: 302 })
+    return NextResponse.next()
   }
 
   // Check if the path requires authentication
