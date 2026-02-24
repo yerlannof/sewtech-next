@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server'
 import { execSync } from 'child_process'
-import { existsSync, readdirSync } from 'fs'
+import { existsSync, readdirSync, createWriteStream } from 'fs'
+import { pipeline } from 'stream/promises'
+import { Readable } from 'stream'
 
 const MEDIA_DIR = '/app/media'
 const ARCHIVE_URL =
   'https://github.com/yerlannof/sewtech-next/releases/download/media-v1/sewtech-media.tar.gz'
 const SECRET = 'sewtech-setup-2026'
+
+export const maxDuration = 300 // 5 min timeout
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -26,12 +30,27 @@ export async function GET(request: Request) {
       }
     }
 
-    // Download and extract
     execSync(`mkdir -p ${MEDIA_DIR}`, { timeout: 5000 })
-    execSync(
-      `curl -L -o /tmp/media.tar.gz "${ARCHIVE_URL}" && tar xzf /tmp/media.tar.gz -C /app/ && rm /tmp/media.tar.gz`,
-      { timeout: 600000, stdio: 'pipe' },
-    )
+
+    // Download using Node.js fetch (follows redirects)
+    const response = await fetch(ARCHIVE_URL, { redirect: 'follow' })
+    if (!response.ok || !response.body) {
+      return NextResponse.json(
+        { status: 'error', message: `Download failed: ${response.status}` },
+        { status: 500 },
+      )
+    }
+
+    // Save to temp file
+    const tmpPath = '/tmp/media.tar.gz'
+    const fileStream = createWriteStream(tmpPath)
+    await pipeline(Readable.fromWeb(response.body as never), fileStream)
+
+    // Extract
+    execSync(`tar xzf ${tmpPath} -C /app/ && rm ${tmpPath}`, {
+      timeout: 300000,
+      stdio: 'pipe',
+    })
 
     const files = readdirSync(MEDIA_DIR)
     return NextResponse.json({
