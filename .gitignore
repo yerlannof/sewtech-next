@@ -27,5 +27,8 @@ next-env.d.ts
 media/
 
 # migration data
-data/
+/data/
 .vercel
+.agents/
+.claude/
+skills-lock.json

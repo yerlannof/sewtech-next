@@ -3,6 +3,7 @@ import Image from 'next/image'
 import type { Product, Media } from '@/payload-types'
 import { ProductCardActions } from './ProductCardActions'
 import { formatPrice, type DisplayCurrency } from '@/lib/price'
+import { getImageUrl } from '@/lib/media-url'
 
 interface ProductCardProps {
   product: Product
@@ -14,7 +15,7 @@ export function ProductCard({ product, exchangeRate = 470, displayCurrency = 'KZ
   // Resolve image — images can be number[] (not populated) or Media[] (populated with depth: 1)
   const firstImage = product.images?.[0]
   const media = typeof firstImage === 'object' ? (firstImage as Media) : null
-  const imageUrl = media?.sizes?.thumbnail?.url || media?.url || null
+  const imageUrl = getImageUrl(media)
 
   return (
     <div className="group relative bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition-all duration-300">

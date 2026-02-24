@@ -10,6 +10,7 @@ import type { Product, Brand, Category, Media } from '@/payload-types'
 import { sanitizeDescriptionHtml } from '@/lib/sanitize-html'
 import { CONTACTS } from '@/lib/contacts'
 import { getCurrencySettings, formatPrice, convertToKZT } from '@/lib/price'
+import { getImageUrl, getFullImageUrl } from '@/lib/media-url'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -92,7 +93,7 @@ export default async function ProductPage({ params }: Props) {
   )
 
   const mainImage = images[0]
-  const mainImageUrl = mainImage?.sizes?.card?.url || mainImage?.url
+  const mainImageUrl = getFullImageUrl(mainImage)
 
   const hasPrice = typeof product.price === 'number' && product.price > 0
   const showErrorCodes = errorCodes.length > 0
@@ -240,7 +241,7 @@ export default async function ProductPage({ params }: Props) {
               {images.length > 1 && (
                 <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
                   {images.map((img, i) => {
-                    const thumbUrl = img.sizes?.thumbnail?.url || img.url
+                    const thumbUrl = getImageUrl(img)
                     if (!thumbUrl) return null
                     return (
                       <div
